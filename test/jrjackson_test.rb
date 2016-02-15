@@ -389,27 +389,28 @@ class JrJacksonTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_can_compat_parse_returning_ruby_objects_string_keys
-    expected = {
-      "a"=>"żółć", # string
-      "b"=>true,    # boolean
-      "c"=>12345,   # number
-      "d"=>
-       [true,
-        [false,
-         [-123456789, nil],
-         0.39676E1,
-         ["Something else.", false],
-         nil]], # mix it up array
-      "e"=>{"zero"=>nil, "one"=>1, "two"=>2, "three"=>[3], "four"=>[0, 1, 2, 3, 4]}, # hash
-      "żółć"=>nil,# nil
-      "h"=>{"a"=>{"b"=>{"c"=>{"d"=>{"e"=>{"f"=>{"g"=>nil}}}}}}},# deep hash, not that deep
-      "i"=>[[[[[[[nil]]]]]]] # deep array, again, not that deep
-    }
-    json = JrJackson::Json.dump(expected)
-    actual = JrJackson::Ruby.compat_parse(json, {})
-    assert_equal expected, actual
-  end
+  # Deprecated - compat_parse method removed
+  # def test_can_compat_parse_returning_ruby_objects_string_keys
+  #   expected = {
+  #     "a"=>"żółć", # string
+  #     "b"=>true,    # boolean
+  #     "c"=>12345,   # number
+  #     "d"=>
+  #      [true,
+  #       [false,
+  #        [-123456789, nil],
+  #        0.39676E1,
+  #        ["Something else.", false],
+  #        nil]], # mix it up array
+  #     "e"=>{"zero"=>nil, "one"=>1, "two"=>2, "three"=>[3], "four"=>[0, 1, 2, 3, 4]}, # hash
+  #     "żółć"=>nil,# nil
+  #     "h"=>{"a"=>{"b"=>{"c"=>{"d"=>{"e"=>{"f"=>{"g"=>nil}}}}}}},# deep hash, not that deep
+  #     "i"=>[[[[[[[nil]]]]]]] # deep array, again, not that deep
+  #   }
+  #   json = JrJackson::Json.dump(expected)
+  #   actual = JrJackson::Ruby.compat_parse(json, {})
+  #   assert_equal expected, actual
+  # end
 
   def test_can_parse_returning_ruby_objects_symbol_keys
     expected = {:a=>"Alpha",
@@ -528,6 +529,19 @@ class JrJacksonTest < Test::Unit::TestCase
     mixed['time'] = timeobj
     actual = JrJackson::Json.dump(mixed)
     assert_equal expected, actual
+  end
+
+  def test_does_not_crash_symbol_table
+    fragments = ["9fa", "9g@", ":Ea", ":F@", ";$a", ";%@"]
+    # fragments = ["9fa", "9g@"]
+    json = ''
+    111111.upto(119999) do |n|
+      json << (json.size.zero? ? '{"' : ', "')
+      json << n.to_s << '":33'
+    end
+    json << '}'
+    err = assert_raises(JrJackson::ParseError) { JrJackson::Json.load(json) }
+    assert_match /hash collision/, err.message
   end
 
   # -----------------------------

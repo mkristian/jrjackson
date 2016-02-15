@@ -28,6 +28,7 @@ import org.jruby.RubyString;
 import org.jruby.RubyStruct;
 import org.jruby.RubySymbol;
 import org.jruby.RubyTime;
+//import org.jruby.RubyT;
 
 public class RubyAnySerializer extends JsonSerializer<IRubyObject> {
 
@@ -153,7 +154,7 @@ public class RubyAnySerializer extends JsonSerializer<IRubyObject> {
             serializeArray(obj, jgen, provider);
 
         } else if (value instanceof RubyTime) {
-//            System.err.println("------->>>> RubyTime");
+
             serializeTime((RubyTime) value, jgen, provider);
 
         } else {
